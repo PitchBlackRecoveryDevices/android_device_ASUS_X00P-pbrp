@@ -1,0 +1,35 @@
+version: 2.1
+executors:
+  worker:
+    docker:
+      - image: fr3akyphantom/droid-builder:latest
+jobs:
+  build:
+    executor: worker
+    environment:
+      MANIFEST_BRANCH: 'android-9.0'
+      VERSION: '3.0.0'
+      VENDOR: 'ASUS'
+      CODENAME: 'X00P'
+      FLAVOR: 'eng'
+      MAINTAINER: '@raza231198'
+      CHANGELOG: |
+        - Test circle ci release
+    working_directory: /home/builder/pitchblack
+    steps:
+      - run:
+          name: AIO Build
+          command: |
+            wget -q https://raw.githubusercontent.com/PitchBlackRecoveryProject/vendor_utils/pb/build.sh
+            source build.sh
+            wget -q https://raw.githubusercontent.com/PitchBlackRecoveryDevices/vendor_utils/pb/pb_deploy.sh
+            bash pb_deploy.sh TEST ${VENDOR} ${CODENAME}
+workflows:
+  version: 2.1
+  build_and_test:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: 'android-9.0'
+          context: org-global
