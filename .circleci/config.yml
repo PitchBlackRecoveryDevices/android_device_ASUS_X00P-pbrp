@@ -1,0 +1,41 @@
+version: 2.1
+executors:
+  worker:
+    docker:
+      - image: fr3akyphantom/droid-builder:latest
+jobs:
+  build:
+    executor: worker
+    environment:
+      MANIFEST_BRANCH: 'android-9.0'
+      VERSION: '3.0.0'
+      VENDOR: 'ASUS'
+      CODENAME: 'X00P'
+      FLAVOR: 'eng'
+      TEST_BUILD: 'true'
+      MAINTAINER: '@raza231198'
+      CHANGELOG: |
+        - Test
+    working_directory: /home/builder/pitchblack
+    steps:
+      - run:
+          name: AIO Build
+          command: |
+            wget -q https://raw.githubusercontent.com/PitchBlackRecoveryProject/vendor_utils/pb/build.sh
+            source build.sh
+            export BUILDFILE=$(find $(pwd)/out/target/product/${CODENAME}/PBRP*.zip 2>/dev/null)
+            export BUILDIMG=$(find $(pwd)/out/target/product/${CODENAME}/recovery.img 2>/dev/null)
+            export UPLOAD_PATH=$(pwd)/out/target/product/${CODENAME}/upload/
+            mkdir ${UPLOAD_PATH}
+            cp $BUILDFILE $UPLOAD_PATH
+            cp $BUILDIMG $UPLOAD_PATH
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -n "PBRP Release for $(echo $CODENAME)" -b "PBRP $(echo $VERSION)" -c ${CIRCLE_SHA1} -delete ${VERSION} ${UPLOAD_PATH}
+workflows:
+  version: 2.1
+  build_and_test:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: 'android-9.0'
+          context: org-global
