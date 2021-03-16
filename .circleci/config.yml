@@ -14,6 +14,7 @@ jobs:
       FLAVOR: 'eng'
       TEST_BUILD: 'true'
       MAINTAINER: '@raza231198'
+      EXTRA_CMD: 'rm -rf bootable/recovery && git clone -b android-9.0 https://github.com/raza231198/android_bootable_recovery bootable/recovery'
       CHANGELOG: |
         - Test
     working_directory: /home/builder/pitchblack
